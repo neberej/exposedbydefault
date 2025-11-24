@@ -16,7 +16,7 @@ All data collection is **100% client-side**. Nothing is transmitted or stored.
 ## Demo
 
 Demo:  
-[ExposedByDefault on GitHub Pages](https://<your-username>.github.io/ExposedByDefault/)
+[ExposedByDefault on GitHub Pages](https://neberej.github.io/exposedbydefault/)
 
 ---
 
@@ -29,3 +29,4 @@ cd ExposedByDefault
 npm install
 npm run dev
 
+Go to http://localhost:5173/exposedbydefault/
