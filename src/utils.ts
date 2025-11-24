@@ -1,6 +1,23 @@
 // src/utils.ts
 import type { FingerprintData } from './modules/types';
 
+
+// Tooltips on mobile
+export function initMobile() {
+  document.querySelectorAll('.tile .tooltip').forEach(tooltip => {
+    tooltip.addEventListener('click', e => {
+      e.stopPropagation();
+      tooltip.classList.toggle('active');
+    });
+  });
+
+  // Close any active tooltip when clicking outside
+  document.body.addEventListener('click', () => {
+    document.querySelectorAll('.tile .tooltip.active').forEach(t => t.classList.remove('active'));
+  });
+}
+
+
 // Safe ID generator for HTML elements
 export function safeId(str: string): string {
   return 'section-' + str

@@ -10,7 +10,7 @@ import {
   getWebGPUInfo, getPWAInfo, updateSensorStates, getMediaCapabilities, getWebCodecs, getWasmFeatures,
   getPrivacyInfo, getJavascriptInfo, getIntlFingerprint
 } from './modules';
-import { safeId, createTile, safePush, calculateFingerprintUniqueness } from './utils';
+import { initMobile, safeId, createTile, safePush, calculateFingerprintUniqueness } from './utils';
 import { getIcon, initIcons } from './icons';
 import { initAccordion, createInfo } from './info';
 
@@ -129,6 +129,7 @@ async function renderApp() {
 
   createIcons({ icons: lucideIcons });
   initAccordion();
+  initMobile();
 
   // Smooth scroll + active nav
   document.querySelectorAll('.nav-item').forEach(link => {
