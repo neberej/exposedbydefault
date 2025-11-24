@@ -8,10 +8,11 @@ import {
   getTimerResolution, getPhoneFingerprint, getStorageInfo, murmurhash3, getNavigatorInfo,
   getMediaDevices, getPermissionsStatus, getInputInfo, getCSSFeatures, getConnectionInfo,
   getWebGPUInfo, getPWAInfo, updateSensorStates, getMediaCapabilities, getWebCodecs, getWasmFeatures,
-  getPrivacyInfo
+  getPrivacyInfo, getJavascriptInfo, getIntlFingerprint
 } from './modules';
 import { safeId, createTile, safePush, calculateFingerprintUniqueness } from './utils';
 import { getIcon, initIcons } from './icons';
+import { initAccordion, createInfo } from './info';
 
 const app = document.getElementById('app')!;
 
@@ -72,6 +73,8 @@ async function renderApp() {
   await safePush(allData, getWebCodecs);
   await safePush(allData, getWasmFeatures);
   await safePush(allData, getPrivacyInfo);
+  await safePush(allData, getJavascriptInfo);
+  await safePush(allData, getIntlFingerprint);
 
   // Sensors
   await updateSensorStates(allData);
@@ -103,7 +106,10 @@ async function renderApp() {
         <span class="word-default">Default</span>
       </h1>
       <p>This is the data your browser hands out automatically, every time!</p>
-      <p class="github-link header"><a href="https://github.com/neberej/exposedbydefault"><i data-lucide="Github"></i></a></p>
+      <p class="github-link header">
+        <a href="https://github.com/neberej/exposedbydefault"><i data-lucide="Github"></i></a>
+        <a href="#info"><i data-lucide="Info"></i></a>
+      </p>
     </header>
 
     <nav class="sticky-nav" id="nav">${createNav(sortedCategories)}</nav>
@@ -114,7 +120,7 @@ async function renderApp() {
     </div>
 
     ${createSections(groups)}
-
+    ${createInfo()}
     <footer>
       <p>100% client-side demo. No data is transmitted or stored!</p>
       <p class="github-link"><i data-lucide="Github"></i><a href="https://github.com/neberej/exposedbydefault">See on Github</a></p>
@@ -122,6 +128,7 @@ async function renderApp() {
   `;
 
   createIcons({ icons: lucideIcons });
+  initAccordion();
 
   // Smooth scroll + active nav
   document.querySelectorAll('.nav-item').forEach(link => {

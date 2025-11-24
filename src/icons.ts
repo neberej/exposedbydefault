@@ -4,15 +4,17 @@ import { createIcons, icons as lucideIcons } from 'lucide';
 // init lucide globally
 export function initIcons() {
   const icons = Object.fromEntries(Object.entries(lucideIcons).map(([k, v]) => [k, v]));
+  console.log(icons)
   createIcons({ icons });
 }
 
 // Get icon name by category
 const categoryIconMap: Record<string, string> = {
   Audio: 'Music',
-  Browser: 'Monitor',
+  'Browser Detection': 'Chrome',
   Network: 'Globe',
   Capabilities: 'Code',
+  'CSS Features': 'Pen',
   Canvas: 'Calculator',
   Display: 'Tv',
   Device: 'Disc',
@@ -20,10 +22,12 @@ const categoryIconMap: Record<string, string> = {
   Identity: 'Fingerprint',
   'Geolocation/Time': 'Globe',
   Graphics: 'Image',
+  Intl: 'Flag',
+  Layout: 'Grid',
   Mobile: 'Phone',
   Environment: 'Hotel',
   Fonts: 'Cctv',
-  Performance: 'ChartBar',
+  Performance: 'Gauge',
   Privacy: 'Brain',
   Permissions: 'Camera',
   System: 'Microchip',

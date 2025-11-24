@@ -275,3 +275,48 @@ footer {
     }
   }
 }
+
+// Info Section
+#info {
+  margin: 2rem 0;
+
+  .accordion {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+
+    .accordion-item {
+      border-bottom: 1px solid #ddd;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .accordion-header {
+        width: 100%;
+        padding: 1rem;
+        text-align: left;
+        background: #f7f7f7;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &:hover {
+          background: #eaeaea;
+        }
+      }
+
+      .accordion-content {
+        padding: 1rem;
+        background: #fff;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+    }
+  }
+}

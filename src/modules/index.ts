@@ -32,3 +32,5 @@ export { getMediaCapabilities } from './mediaCapabilities';
 export { getWebCodecs } from './webcodecs';
 export { getWasmFeatures } from './webassembly';
 export { getPrivacyInfo } from './privacy';
+export { getJavascriptInfo } from './javascript';
+export { getIntlFingerprint } from './intl';

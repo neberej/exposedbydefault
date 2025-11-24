@@ -17,20 +17,6 @@ export function escapeHtml(text: string): string {
   return div.innerHTML;
 }
 
-// Create a single tile for display
-export function createTile1(item: FingerprintData): HTMLDivElement {
-  const tile = document.createElement('div');
-  tile.className = 'tile';
-
-  const shortValue = item.value.length > 168 ? item.value.slice(0, 165) + ' ...' : item.value;
-
-  tile.innerHTML = `
-    <h3 class="tile-key">${escapeHtml(item.key)}</h3>
-    <p class="tile-value">${escapeHtml(shortValue)}</p>
-  `;
-
-  return tile;
-}
 
 // Async helper to safely push module data
 export async function safePush1<T>(arr: T[], fn: () => Promise<T[] | T>, fallback: T[] = []): Promise<void> {
