@@ -1,6 +1,10 @@
 import type { FingerprintData } from './types';
 
 export function getSpeechVoices(): FingerprintData[] {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    return [];
+  }
+
   const voices = (speechSynthesis.getVoices() || [])
     .map(v => `${v.name} (${v.lang})`)
     .sort()
@@ -23,4 +27,6 @@ export function getSpeechVoices(): FingerprintData[] {
 }
 
 // Trigger voice loading
-speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}

@@ -10,7 +10,7 @@ import {
   getWebGPUInfo, getPWAInfo, updateSensorStates, getMediaCapabilities, getWebCodecs, getWasmFeatures,
   getPrivacyInfo, getJavascriptInfo, getIntlFingerprint
 } from './modules';
-import { initMobile, safeId, createTile, safePush, calculateFingerprintUniqueness } from './utils';
+import { initMobile, safeId, createTile, safePush } from './utils';
 import { getIcon, initIcons } from './icons';
 import { initAccordion, createInfo } from './info';
 
@@ -79,13 +79,22 @@ async function renderApp() {
   // Sensors
   await updateSensorStates(allData);
 
+
+  const STABLE_KEYS = new Set([
+    'User Agent', 'Platform', 'Hardware Threads', 'Device Memory',
+    'Screen Resolution', 'Screen Pixel Ratio', 'Language', 'Languages',
+    'Time Zone', 'WebGL Vendor', 'WebGL Renderer',
+    'Canvas Fingerprint', 'Audio Fingerprint', 'Fonts',
+    'Wasm Features', 'Intl Fingerprint'
+  ]);
+  
   // Fingerprint hash
   const fingerprintString = allData
-    .sort((a, b) => a.key.localeCompare(b.key))
-    .map(d => `${d.key}:${d.value}`).join('|||');
+  .filter(d => STABLE_KEYS.has(d.key))
+  .sort((a, b) => a.key.localeCompare(b.key))
+  .map(d => `${d.key}:${d.value}`)
+  .join('|');
 
-
-  const uniquenessNumber = calculateFingerprintUniqueness(allData);
 
   const finalHash = murmurhash3(fingerprintString);
   allData.push({ category: 'Identity', key: 'Unique Fingerprint ID', value: finalHash });
@@ -116,7 +125,6 @@ async function renderApp() {
 
     <div class="summary">
       <p><strong>Fingerprint ID:</strong> <code>${finalHash}</code></p>
-      <p>Unique to <strong>1 in ${uniquenessNumber.toLocaleString()}+</strong> devices.</p>
     </div>
 
     ${createSections(groups)}

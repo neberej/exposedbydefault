@@ -77,39 +77,3 @@ export function createTile(item: FingerprintData) {
 
   return tile;
 }
-
-export function calculateFingerprintUniqueness(allData: FingerprintData[]): number {
-  const FEATURE_ENTROPY_BITS: Record<string, number> = {
-    'Canvas Fingerprint': 8,
-    'Audio Fingerprint': 6,
-    'Fonts': 8,
-    'WebGL Renderer': 6,
-    'WebGL Vendor': 2,
-    'Speech Voices': 4,
-    'Public IP': 8,
-    'Local IPs (WebRTC)': 2,
-    'Geolocation': 4,
-    'Time Zone': 2,
-    'Language': 1,
-    'WebCodecs': 1,
-    'AV1 Support': 1,
-    'HEVC Support': 1,
-    'VP9 Support': 1,
-    'Device Motion / Orientation': 1,
-    'Hardware Threads': 1,
-    'Screen Pixel Ratio': 1,
-  };
-
-  let totalBits = 0;
-
-  for (const [feature, bits] of Object.entries(FEATURE_ENTROPY_BITS)) {
-    const found = allData.find(d => d.key === feature || d.key.includes(feature));
-    if (found && found.value) {
-      totalBits += bits;
-    }
-  }
-
-  // Cap at 53 bits for safe JS number
-  const cappedBits = Math.min(totalBits, 53);
-  return Math.pow(2, cappedBits);
-}
