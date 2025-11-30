@@ -24,7 +24,7 @@ Demo:
 
 
 ```bash
-git clone https://github.com/<your-username>/ExposedByDefault.git
+git clone https://github.com/neberej/ExposedByDefault.git
 cd ExposedByDefault
 npm install
 npm run dev
