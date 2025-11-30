@@ -56,7 +56,7 @@ async function renderApp() {
   allData.push(
     ...getUserAgent(), ...getScreenInfo(), ...getWebGLInfo(), ...getHardwareInfo(),
     ...getTimezoneInfo(), ...getFonts(), ...getCanvasFingerprint(), ...getBatteryInfo(),
-    ...getWebRTCIPs(), ...getCPUBenchmark(), ...getSpeechVoices(), ...getTouchInfo(),
+    ...getWebRTCIPs(), ...getCPUBenchmark(), ...getTouchInfo(),
     ...getFullScreenInfo(), ...getTimerResolution(), ...getPhoneFingerprint(), ...getStorageInfo(),
     ...getNavigatorInfo(), ...getInputInfo(), ...getCSSFeatures(), ...getConnectionInfo(),
     ...getPWAInfo()
@@ -75,6 +75,7 @@ async function renderApp() {
   await safePush(allData, getPrivacyInfo);
   await safePush(allData, getJavascriptInfo);
   await safePush(allData, getIntlFingerprint);
+  await safePush(allData, getSpeechVoices);
 
   // Sensors
   await updateSensorStates(allData);

@@ -1,6 +1,6 @@
 import type { FingerprintData } from './types';
 
-export function getSpeechVoices(): FingerprintData[] {
+export async function getSpeechVoices(): Promise<FingerprintData[]> {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     return [];
   }

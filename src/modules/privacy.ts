@@ -23,33 +23,40 @@ export function getDoNotTrackStatus(): FingerprintData {
 }
 
 // Detect if common trackers are blocked (heuristic).
-export function detectTrackerBlocking(): Promise<FingerprintData> {
-  return new Promise((resolve) => {
-    const testUrl = 'https://www.google-analytics.com/analytics.js';
-    const img = document.createElement('img');
+export async function detectTrackerBlocking(): Promise<FingerprintData> {
+  const trackerUrls = [
+    'https://www.google-analytics.com/analytics.js',
+    'https://www.googletagmanager.com/gtag/js',
+    'https://connect.facebook.net/en_US/sdk.js',
+  ];
 
-    img.onload = () => resolve({
-      category: 'Privacy',
-      key: 'Tracker Blocking',
-      value: 'No (resource loaded)',
-      tooltip: 'Indicates if a common tracker script or image is blocked by an extension or privacy mode.'
-    });
+  const results = await Promise.all(
+    trackerUrls.map(async (url) => {
+      try {
+        const response = await fetch(url + '?cachebust=' + Math.random(), {
+          method: 'GET',
+          mode: 'no-cors',
+          cache: 'no-store',
+          // @ts-ignore
+          credentials: 'omit',
+        });
 
-    img.onerror = () => resolve({
-      category: 'Privacy',
-      key: 'Tracker Blocking',
-      value: 'Yes (resource blocked)',
-      tooltip: 'Indicates if a common tracker script or image is blocked by an extension or privacy mode.'
-    });
+        return false; // not blocked
+      } catch (err) {
+        // Network error or blocked by extension → very likely blocked
+        return true;
+      }
+    })
+  );
 
-    img.src = testUrl + '?rand=' + Math.random();
-    img.style.display = 'none';
-    document.body.appendChild(img);
+  const isBlocked = results.some(blocked => blocked);
 
-    setTimeout(() => {
-      document.body.removeChild(img);
-    }, 3000);
-  });
+  return {
+    category: 'Privacy',
+    key: 'Tracker Blocking',
+    value: isBlocked ? 'Yes' : 'No',
+    tooltip: 'Common analytics/tracking scripts are being blocked (e.g. by uBlock Origin, Privacy Badger, Brave Shield, etc.)',
+  };
 }
 
 // Detect if the browser is in incognito/private mode. (Super unreliable)
