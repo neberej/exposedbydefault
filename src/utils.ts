@@ -56,9 +56,20 @@ export async function safePush(allData: FingerprintData[], fn: () => Fingerprint
 }
 
 
+// Stable identity for a tile (key alone isn't unique across categories).
+export function tileId(item: Pick<FingerprintData, 'category' | 'key'>): string {
+  return `${item.category}::${item.key}`;
+}
+
+export function updateTile(item: FingerprintData, value: string): void {
+  const valueEl = document.querySelector(`.tile[data-id="${CSS.escape(tileId(item))}"] .tile-value`);
+  if (valueEl) valueEl.textContent = value;
+}
+
 export function createTile(item: FingerprintData) {
   const tile = document.createElement('div');
   tile.className = 'tile';
+  tile.dataset.id = tileId(item);
 
   const shortValue = item.value.length > 168 ? item.value.slice(0, 165) + ' ...' : item.value;
 

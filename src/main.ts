@@ -7,10 +7,10 @@ import {
   getCPUBenchmark, getSpeechVoices, getClientHints, getTouchInfo, getFullScreenInfo,
   getTimerResolution, getPhoneFingerprint, getStorageInfo, murmurhash3, getNavigatorInfo,
   getMediaDevices, getPermissionsStatus, getInputInfo, getCSSFeatures, getConnectionInfo,
-  getWebGPUInfo, getPWAInfo, updateSensorStates, getMediaCapabilities, getWebCodecs, getWasmFeatures,
+  getWebGPUInfo, getPWAInfo, getMediaCapabilities, getWebCodecs, getWasmFeatures,
   getPrivacyInfo, getJavascriptInfo, getIntlFingerprint
 } from './modules';
-import { initMobile, safeId, createTile, safePush } from './utils';
+import { initMobile, safeId, createTile, safePush, updateTile } from './utils';
 import { getIcon, initIcons } from './icons';
 import { initAccordion, createInfo } from './info';
 
@@ -77,10 +77,6 @@ async function renderApp() {
   await safePush(allData, getIntlFingerprint);
   await safePush(allData, getSpeechVoices);
 
-  // Sensors
-  await updateSensorStates(allData);
-
-
   const STABLE_KEYS = new Set([
     'User Agent', 'Platform', 'Hardware Threads', 'Device Memory',
     'Screen Resolution', 'Screen Pixel Ratio', 'Language', 'Languages',
@@ -139,6 +135,14 @@ async function renderApp() {
   createIcons({ icons: lucideIcons });
   initAccordion();
   initMobile();
+
+  // Asynchronous resolve
+  for (const item of allData) {
+    item.resolve?.()
+      .then(value => updateTile(item, value))
+      .catch(() => updateTile(item, 'Unavailable'));
+    item.live?.(value => updateTile(item, value));
+  }
 
   // Smooth scroll + active nav
   document.querySelectorAll('.nav-item').forEach(link => {

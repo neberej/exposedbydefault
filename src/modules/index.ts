@@ -27,7 +27,7 @@ export { getCSSFeatures } from './cssFeatures';
 export { getConnectionInfo } from './connection';
 export { getWebGPUInfo } from './webgpu';
 export { getPWAInfo } from './pwa';
-export { updateSensorStates } from './sensor';
+export { streamSensor } from './sensor';
 export { getMediaCapabilities } from './mediaCapabilities';
 export { getWebCodecs } from './webcodecs';
 export { getWasmFeatures } from './webassembly';
