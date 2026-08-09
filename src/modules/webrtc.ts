@@ -1,81 +1,104 @@
-import type { FingerprintData } from "./types";
+import type { FingerprintData } from './types';
 
-export function getWebRTCIPs(): FingerprintData[] {
-  const hostCandidates: any[] = [];
-  const stunCandidates: any[] = [];
-  const rawLines: string[] = [];
+export async function getWebRTCIPs(): Promise<FingerprintData[]> {
+  return new Promise(resolve => {
+    const hostCandidates: any[] = [];
+    const stunCandidates: any[] = [];
+    const rawLines: string[] = [];
 
-  try {
-    const rtc = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    });
+    let rtc: RTCPeerConnection;
 
-    rtc.createDataChannel("x");
-    rtc.createOffer().then((offer) => rtc.setLocalDescription(offer));
+    try {
+      rtc = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+      });
+    } catch {
+      resolve([
+        {
+          category: 'Network',
+          key: 'WebRTC',
+          value: 'WebRTC not supported or blocked',
+          tooltip: 'RTCPeerConnection could not be created.',
+        },
+      ]);
 
-    rtc.onicecandidate = (event) => {
-      if (!event.candidate) return;
+      return;
+    }
 
-      const c = event.candidate.candidate;
-      rawLines.push(c);
+    let finished = false;
 
-      // Full ICE parsing
-      const parsed = parseCandidate(c);
-      if (!parsed) return;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
 
-      if (parsed.type === "host") hostCandidates.push(parsed);
-      if (parsed.type === "srflx") stunCandidates.push(parsed);
+      rtc.close();
+
+      resolve([
+        {
+          category: 'Network',
+          key: 'WebRTC Host Candidates',
+          value: hostCandidates.length
+            ? JSON.stringify(hostCandidates)
+            : 'None',
+          tooltip: 'Host ICE candidates exposed during WebRTC gathering.',
+        },
+        {
+          category: 'Network',
+          key: 'WebRTC STUN Candidates',
+          value: stunCandidates.length
+            ? JSON.stringify(stunCandidates)
+            : 'None',
+          tooltip: 'Server-reflexive ICE candidates obtained through STUN.',
+        },
+        {
+          category: 'Network',
+          key: 'WebRTC Raw ICE Lines',
+          value: rawLines.length
+            ? rawLines.join(' | ')
+            : 'No candidates generated',
+          tooltip: 'Raw ICE candidate lines produced during WebRTC gathering.',
+        },
+      ]);
     };
 
-    // close after 3 seconds
-    setTimeout(() => rtc.close(), 3000);
-  } catch (err) {
-    return [
-      {
-        category: "Network",
-        key: "WebRTC",
-        value: "WebRTC not supported or blocked",
-        tooltip: "RTCPeerConnection threw an error.",
-      },
-    ];
-  }
+    rtc.onicecandidate = event => {
+      if (!event.candidate) {
+        finish();
+        return;
+      }
 
-  return [
-    {
-      category: "Network",
-      key: "WebRTC Host Candidates",
-      value: hostCandidates.length
-        ? JSON.stringify(hostCandidates, null, 2)
-        : "None",
-      tooltip: "Local network interfaces discovered (host ICE candidates).",
-    },
-    {
-      category: "Network",
-      key: "WebRTC STUN Candidates",
-      value: stunCandidates.length
-        ? JSON.stringify(stunCandidates, null, 2)
-        : "None",
-      tooltip: "Public IP addresses discovered via STUN (srflx candidates).",
-    },
-    {
-      category: "Network",
-      key: "WebRTC Raw ICE Lines",
-      value: rawLines.length
-        ? rawLines.join(" | ")
-        : "No candidates generated",
-      tooltip: "Raw ICE candidate SDP lines for detailed fingerprinting.",
-    },
-  ];
+      const candidate = event.candidate.candidate;
+      rawLines.push(candidate);
+
+      const parsed = parseCandidate(candidate);
+
+      if (!parsed) return;
+
+      if (parsed.type === 'host') {
+        hostCandidates.push(parsed);
+      }
+
+      if (parsed.type === 'srflx') {
+        stunCandidates.push(parsed);
+      }
+    };
+
+    rtc.createDataChannel('x');
+
+    rtc.createOffer()
+      .then(offer => rtc.setLocalDescription(offer))
+      .catch(finish);
+
+    setTimeout(finish, 3000);
+  });
 }
 
-// ICE Candidate Parser 
 function parseCandidate(candidate: string) {
-  // example:
-  // candidate:842163049 1 udp 1677729535 192.168.1.5 53654 typ host generation 0
   const regex =
-    /candidate:(\S+)\s+(\d+)\s+(\S+)\s+(\d+)\s+([\w\.:]+)\s+(\d+)\s+typ\s+(\S+)(?:\s+raddr\s+([\w\.:]+)\s+rport\s+(\d+))?/;
+    /candidate:(\S+)\s+(\d+)\s+(\S+)\s+(\d+)\s+(\S+)\s+(\d+)\s+typ\s+(\S+)(?:\s+raddr\s+(\S+)\s+rport\s+(\d+))?/;
 
   const match = candidate.match(regex);
+
   if (!match) return null;
 
   return {

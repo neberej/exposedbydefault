@@ -34,3 +34,6 @@ export { getWasmFeatures } from './webassembly';
 export { getPrivacyInfo } from './privacy';
 export { getJavascriptInfo } from './javascript';
 export { getIntlFingerprint } from './intl';
+export { getWebGLFingerprint } from './webglFingerprint';
+export { getNavigatorSurface } from './navigatorSurface';
+export { getMediaFormats } from './mediaFormats';

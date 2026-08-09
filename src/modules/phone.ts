@@ -103,12 +103,6 @@ export function getPhoneFingerprint(): FingerprintData[] {
         key: 'Location Bar Visible',
         value: locationBarVisible ? 'Yes' : 'No',
         tooltip: 'Shows if the browser location bar is visible. Determined by comparing visualViewport height to window.innerHeight.'
-      },
-      {
-        category: 'Mobile',
-        key: 'Visual Viewport Height',
-        value: visualViewport.height.toString(),
-        tooltip: 'Height of the visible portion of the page. Obtained from window.visualViewport.height.'
       }
     );
   }

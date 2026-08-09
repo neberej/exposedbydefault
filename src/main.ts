@@ -8,7 +8,7 @@ import {
   getTimerResolution, getPhoneFingerprint, getStorageInfo, murmurhash3, getNavigatorInfo,
   getMediaDevices, getPermissionsStatus, getInputInfo, getCSSFeatures, getConnectionInfo,
   getWebGPUInfo, getPWAInfo, updateSensorStates, getMediaCapabilities, getWebCodecs, getWasmFeatures,
-  getPrivacyInfo, getJavascriptInfo, getIntlFingerprint
+  getPrivacyInfo, getJavascriptInfo, getIntlFingerprint, getWebGLFingerprint, getNavigatorSurface, getMediaFormats,
 } from './modules';
 import { initMobile, safeId, createTile, safePush } from './utils';
 import { getIcon, initIcons } from './icons';
@@ -53,14 +53,11 @@ async function renderApp() {
   const allData: FingerprintData[] = [];
 
   // Synchronous modules
-  allData.push(
-    ...getUserAgent(), ...getScreenInfo(), ...getWebGLInfo(), ...getHardwareInfo(),
-    ...getTimezoneInfo(), ...getFonts(), ...getCanvasFingerprint(), ...getBatteryInfo(),
-    ...getWebRTCIPs(), ...getCPUBenchmark(), ...getTouchInfo(),
-    ...getFullScreenInfo(), ...getTimerResolution(), ...getPhoneFingerprint(), ...getStorageInfo(),
-    ...getNavigatorInfo(), ...getInputInfo(), ...getCSSFeatures(), ...getConnectionInfo(),
-    ...getPWAInfo()
-  );
+  allData.push( ...getUserAgent(), ...getScreenInfo(), ...getWebGLInfo(), ...getWebGLFingerprint(), ...getHardwareInfo(), 
+  ...getTimezoneInfo(), ...getFonts(), ...getCanvasFingerprint(), ...getBatteryInfo(), ...getCPUBenchmark(), 
+  ...getTouchInfo(), ...getFullScreenInfo(), ...getTimerResolution(), ...getPhoneFingerprint(), ...getStorageInfo(),
+  ...getNavigatorInfo(), ...getNavigatorSurface(), ...getInputInfo(), ...getCSSFeatures(), ...getConnectionInfo(), 
+  ...getPWAInfo(), ...getMediaFormats(), );
 
   // Async modules using safePush
   await safePush(allData, getIPInfo);
@@ -70,6 +67,7 @@ async function renderApp() {
   await safePush(allData, getPermissionsStatus);
   await safePush(allData, getWebGPUInfo);
   await safePush(allData, getMediaCapabilities);
+  await safePush(allData, getWebRTCIPs);
   await safePush(allData, getWebCodecs);
   await safePush(allData, getWasmFeatures);
   await safePush(allData, getPrivacyInfo);
@@ -82,22 +80,44 @@ async function renderApp() {
 
 
   const STABLE_KEYS = new Set([
-    'User Agent', 'Platform', 'Hardware Threads', 'Device Memory',
-    'Screen Resolution', 'Screen Pixel Ratio', 'Language', 'Languages',
-    'Time Zone', 'WebGL Vendor', 'WebGL Renderer',
-    'Canvas Fingerprint', 'Audio Fingerprint', 'Fonts',
-    'Wasm Features', 'Intl Fingerprint'
-  ]);
-  
-  // Fingerprint hash
-  const fingerprintString = allData
-  .filter(d => STABLE_KEYS.has(d.key))
-  .sort((a, b) => a.key.localeCompare(b.key))
-  .map(d => `${d.key}:${d.value}`)
-  .join('|');
+    'Device:User Agent',
+    'Device:Platform',
+    'Device:Language',
 
+    'System:Hardware Threads',
+    'System:Device Memory (GB)',
+
+    'Screen:Resolution',
+    'Screen:Pixel Ratio',
+
+    'Geolocation/Time:Time Zone',
+
+    'Graphics:Vendor',
+    'Graphics:Renderer',
+    'Graphics:WebGL Parameters Fingerprint',
+    'Graphics:Shader Precision Fingerprint',
+
+    'JavaScript Engine:Navigator Surface Fingerprint',
+
+    'Media:Media Format Fingerprint',
+
+    'Canvas:Deep Fingerprint Hash',
+
+    'Audio:Audio Fingerprint',
+
+    'Fonts:Detected',
+  ]);
+
+  const fingerprintString = allData
+    .filter(d => STABLE_KEYS.has(`${d.category}:${d.key}`))
+    .sort((a, b) =>
+      `${a.category}:${a.key}`.localeCompare(`${b.category}:${b.key}`)
+    )
+    .map(d => `${d.category}:${d.key}:${d.value}`)
+    .join('|');
 
   const finalHash = murmurhash3(fingerprintString);
+
   allData.push({ category: 'Identity', key: 'Unique Fingerprint ID', value: finalHash });
 
   // Group by category
@@ -131,7 +151,7 @@ async function renderApp() {
     ${createSections(groups)}
     ${createInfo()}
     <footer>
-      <p>100% client-side demo. No data is transmitted or stored!</p>
+      <p>100% client-side demo. No fingerprint data is stored by this site.</p>
       <p class="github-link"><i data-lucide="Github"></i><a href="https://github.com/neberej/exposedbydefault">See on Github</a></p>
       </footer>
   `;
