@@ -20,28 +20,34 @@ function measure(fn: () => void): number {
 function getErrorSignature(): string {
   try {
     const e = new Error("x");
+
     return [
       e.name,
       e.message,
-      e.stack?.split("\n")[1]?.trim() || "no_stack"
+      e.stack?.split("\n")[1]?.trim() || "no_stack",
     ].join(" | ");
   } catch {
     return "unavailable";
   }
 }
 
-// detect proxy behavior
+// detect Proxy behavior
 function getProxyBehavior(): string {
   try {
     const target = { a: 1 };
+
     const handler = {
       get(obj: any, prop: string) {
         if (prop === "a") return 999; // unnatural override
         return obj[prop];
-      }
+      },
     };
+
     const proxied = new Proxy(target, handler);
-    return proxied.a === 999 ? "Proxy override detected" : "Proxy not detectable";
+
+    return proxied.a === 999
+      ? "Proxy override detected"
+      : "Proxy not detectable";
   } catch {
     return "unavailable";
   }
@@ -50,9 +56,11 @@ function getProxyBehavior(): string {
 // JS engine signature
 function getEngineSignature(): string {
   try {
-    const fn = function NamedFuncExample(x: number, y: number) { return x + y; };
-    const fnStr = fn.toString().replace(/\s+/g, " ");
+    const fn = function NamedFuncExample(x: number, y: number) {
+      return x + y;
+    };
 
+    const fnStr = fn.toString().replace(/\s+/g, " ");
     const errSig = getErrorSignature();
     const jsonSig = JSON.stringify({ x: 1 });
     const locale = (1.1).toLocaleString();
@@ -64,15 +72,17 @@ function getEngineSignature(): string {
 }
 
 export function getJavascriptInfo(): FingerprintData[] {
-  // Window keys
   const windowKeys = safeKeys(window);
-  const navigatorKeys = safeKeys(navigator);
   const elementKeys = safeKeys(HTMLElement.prototype);
 
   // Timing: how long it takes to enumerate 10k ownPropertyNames
   const timingBench = measure(() => {
-    const tmp = {};
-    for (let i = 0; i < 10000; i++) (tmp as any)["k" + i] = i;
+    const tmp: Record<string, number> = {};
+
+    for (let i = 0; i < 10000; i++) {
+      tmp["k" + i] = i;
+    }
+
     Object.getOwnPropertyNames(tmp);
   });
 
@@ -85,43 +95,37 @@ export function getJavascriptInfo(): FingerprintData[] {
       category: "JavaScript Engine",
       key: "Window Keys",
       value: windowKeys.length.toString(),
-      tooltip: "Count of own properties on window object (high entropy)."
-    },
-    {
-      category: "JavaScript Engine",
-      key: "Navigator Keys",
-      value: navigatorKeys.length.toString(),
-      tooltip: "Count of own properties on navigator (browser-dependent)."
+      tooltip: "Count of own properties exposed on the window object.",
     },
     {
       category: "JavaScript Engine",
       key: "HTMLElement Prototype Keys",
       value: elementKeys.length.toString(),
-      tooltip: "HTMLElement.prototype keys reveal engine/browser version."
+      tooltip: "Number of properties exposed by HTMLElement.prototype.",
     },
     {
       category: "JavaScript Engine",
       key: "Property Enumeration Timing",
       value: timingBench.toFixed(2) + " ms",
-      tooltip: "Timing for large Object.getOwnPropertyNames call (JIT-dependent)."
+      tooltip: "Timing for a large Object.getOwnPropertyNames operation.",
     },
     {
       category: "JavaScript Engine",
       key: "Proxy Behavior",
       value: proxyBehavior,
-      tooltip: "Checking if Proxy traps alter observable behavior."
+      tooltip: "Observable JavaScript Proxy trap behavior.",
     },
     {
       category: "JavaScript Engine",
       key: "Error Stack Signature",
       value: errorSig.slice(0, 120) + "...",
-      tooltip: "Error stack formatting reveals JS engine (V8/SpiderMonkey/WebKit)."
+      tooltip: "Error stack formatting can reveal JavaScript engine differences.",
     },
     {
       category: "JavaScript Engine",
       key: "Engine Signature",
       value: engineSig.slice(0, 150) + "...",
-      tooltip: "Composite JS engine fingerprint derived from functions, errors, JSON, and locale formatting."
-    }
+      tooltip: "Composite engine signature derived from functions, errors, JSON, and locale behavior.",
+    },
   ];
 }
